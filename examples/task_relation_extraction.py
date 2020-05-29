@@ -96,6 +96,7 @@ class data_generator(DataGenerator):
                 for s in spoes:
                     subject_labels[s[0], 0] = 1
                     subject_labels[s[1], 1] = 1
+                #这里更改数据生成方式，避免数据稀疏性，尝试将全量的S送去训练
                 # 随机选一个subject
                 start, end = np.array(list(spoes.keys())).T
                 start = np.random.choice(start)
@@ -155,6 +156,7 @@ output = Dense(
     units=2, activation='sigmoid', kernel_initializer=bert.initializer
 )(bert.model.output)
 subject_preds = Lambda(lambda x: x**2)(output)
+#这里主要对loss做了优化，理论依据：https://kexue.fm/archives/7161
 
 subject_model = Model(bert.model.inputs, subject_preds)
 
@@ -169,6 +171,7 @@ output = Dense(
     kernel_initializer=bert.initializer
 )(output)
 output = Lambda(lambda x: x**4)(output)
+#这里主要对loss做了优化，理论依据：https://kexue.fm/archives/7161
 object_preds = Reshape((-1, len(predicate2id), 2))(output)
 
 object_model = Model(bert.model.inputs + [subject_ids], object_preds)
